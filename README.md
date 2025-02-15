@@ -1,5 +1,6 @@
 # TermStockTicker
 A terminal stock ticker to track one symbol.
+![Capture6](https://github.com/user-attachments/assets/4df13059-bdd0-47f8-a988-a7c077c57326)
 
 # Getting Started
 1. Get free API key from finnhub (https://finnhub.io/dashboard)
