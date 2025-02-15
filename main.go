@@ -29,20 +29,22 @@ func main() {
 	defer ui.Close()
 
 	p := widgets.NewParagraph()
-	p.SetRect(0, 0, 50, 5)
+	p.Title = fmt.Sprintf("Stock Ticker %s", symbol)
+	p.BorderStyle.Fg = ui.ColorCyan
+	p.SetRect(0, 0, 60, 4)
 
-	sl := widgets.NewSparkline()
-	sl.MaxHeight = 2000
-	sl.LineColor = ui.ColorGreen
-	sl.Data = buffer.GetAll()
-
-	slg := widgets.NewSparklineGroup(sl)
-	slg.Title = fmt.Sprintf("Stock Ticker %s", symbol)
-	slg.SetRect(0, 5, 50, 15)
+	lc := widgets.NewPlot()
+	lc.Marker = widgets.MarkerDot
+	lc.AxesColor = ui.ColorWhite
+	lc.LineColors[0] = ui.ColorGreen
+	lc.DrawDirection = widgets.DrawLeft
+	lc.BorderStyle.Fg = ui.ColorCyan
+	lc.SetRect(0, 4, 60, 15)
 
 	l := widgets.NewList()
-	l.Title = "10 last data points"
-	l.SetRect(50, 0, 70, 15)
+	l.Title = "Latest data"
+	l.BorderStyle.Fg = ui.ColorCyan
+	l.SetRect(60, 0, 75, 15)
 
 	// Fetch stock data once before entering the loop
 	stockInfo, err := stock.GetStockInfo(symbol, apiKey)
@@ -51,18 +53,17 @@ func main() {
 	} else {
 		buffer.Add(float64(*stockInfo.C))
 
-		p.Text = fmt.Sprintf("Stock: %s\nCurrent Price: %f\nChange Percent: %f",
-			symbol, *stockInfo.C, *stockInfo.Dp)
-		sl.Data = buffer.GetAll()
+		p.Text = fmt.Sprintf("Current Price: %f\nChange Percent: %f", *stockInfo.C, *stockInfo.Dp)
+		lc.Data = [][]float64{buffer.GetAll()}
 
-		lastTen := buffer.GetLastN(10)
+		lastTen := buffer.GetLastN(15)
 		var stringArr []string
 		for _, f := range lastTen {
 			stringArr = append(stringArr, strconv.FormatFloat(f, 'f', 2, 64))
 		}
 		l.Rows = stringArr
 	}
-	ui.Render(p, l, slg)
+	ui.Render(p, l, lc)
 
 	for {
 		select {
@@ -77,9 +78,8 @@ func main() {
 			} else {
 				buffer.Add(float64(*stockInfo.C))
 
-				p.Text = fmt.Sprintf("Stock: %s\nCurrent Price: %f\nChange Percent: %f",
-					symbol, *stockInfo.C, *stockInfo.Dp)
-				sl.Data = buffer.GetAll()
+				p.Text = fmt.Sprintf("Current Price: %f\nChange Percent: %f", *stockInfo.C, *stockInfo.Dp)
+				lc.Data = [][]float64{buffer.GetAll()}
 
 				lastTen := buffer.GetLastN(10)
 				var stringArr []string
@@ -88,7 +88,7 @@ func main() {
 				}
 				l.Rows = stringArr
 			}
-			ui.Render(p, l, slg)
+			ui.Render(p, l, lc)
 		}
 	}
 }
@@ -112,7 +112,7 @@ func getBufferSize() int {
 	bufferSize, err := strconv.Atoi(bufferSizeStr)
 
 	if err != nil {
-		return 100
+		return 50
 	}
 
 	return bufferSize

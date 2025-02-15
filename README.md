@@ -10,3 +10,4 @@ STOCK_SYMBOL=AAPL
 BUFFER_SIZE=100
 ```
 3. Run `go run main.go`
+4. Press 'q' to quit
